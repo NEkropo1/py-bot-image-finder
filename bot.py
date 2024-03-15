@@ -5,7 +5,7 @@ import pyautogui
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
-template_path = "like.png"  # Global path to the image you're looking for
+template_path = "cookie.png"  # Global path to the image you're looking for
 
 
 def capture_screen():
@@ -19,11 +19,13 @@ def find_image_on_screen(template_path):
     screen_rgb = capture_screen()
     screen_gray = cv2.cvtColor(screen_rgb, cv2.COLOR_BGR2GRAY)  # Convert screenshot to grayscale
     template = cv2.imread(template_path, cv2.IMREAD_UNCHANGED)
+
     if template is None:
         print(f"Template image not found at path: {template_path}")
         return None
     if template.shape[-1] == 4:  # Check if template has an alpha channel
         template = cv2.cvtColor(template, cv2.COLOR_BGRA2BGR)
+
     template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)  # Convert template to grayscale
     res = cv2.matchTemplate(screen_gray, template_gray, cv2.TM_CCOEFF_NORMED)
     threshold = 0.8
