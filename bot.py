@@ -5,7 +5,7 @@ import pyautogui
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
-template_path = "cookie.png"  # Global path to the image you're looking for
+template_path = "cookie.png"  # ім'я файлу з зображенням, що ми намагаємось знайти
 
 
 def capture_screen():
@@ -21,7 +21,7 @@ def find_image_on_screen(template_path):
     template = cv2.imread(template_path, cv2.IMREAD_UNCHANGED)
 
     if template is None:
-        print(f"Template image not found at path: {template_path}")
+        print(f"Не знайдено: {template_path}")
         return None
     if template.shape[-1] == 4:  # Check if template has an alpha channel
         template = cv2.cvtColor(template, cv2.COLOR_BGRA2BGR)
@@ -73,12 +73,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         register_user(user_id)
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text="You are now registered! Hello! This bot will notify you when to click."
+            text="Привіт! За допомогою цього бота ви можете знайти зображення на вашому екрані, якщо воно там є."
         )
     else:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text="Welcome back! Ready to click some more?"
+            text="З поверненням! Хочете ще поклікати?"
         )
 
 
@@ -86,22 +86,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_message = str(update.message.text).lower().strip("!,./@#$%^&*()")
     user_id = update.effective_user.id
 
-    if is_user_registered(user_id) and "find" in user_message and "cookie" in user_message:
+    if is_user_registered(user_id) and "знайди" in user_message and "печиво" in user_message:
         loc = find_image_on_screen(template_path)
         if loc and loc[0].size:
-            await update.message.reply_text("Cookie found! How many times do you want to click?")
+            await update.message.reply_text("Печиво знайдено! Скільки разів ви хочете на нього клікнути? Введіть цифру:")
             context.user_data['loc'] = loc  # Store location in user_data for follow-up
         else:
-            await update.message.reply_text("Cookie not found on screen :(")
+            await update.message.reply_text("Печиво не знайдено на екрані :(")
     elif 'loc' in context.user_data:
-        # Assume the message is a number of times they want to click
         try:
             times_to_click = int(user_message)
             click_on_image_position_times(context.user_data['loc'], times_to_click)
-            await update.message.reply_text(f"Clicked the cookie {times_to_click} times!")
+            await update.message.reply_text(f"Натиснули на печиво {times_to_click} раз!")
             del context.user_data['loc']  # Clear the stored location after clicking
         except ValueError:
-            await update.message.reply_text("Please enter a valid number.")
+            await update.message.reply_text("Будь ласка, введіть ціле число, або вірну команду.")
 
 
 # Main function setup remains largely the same...
